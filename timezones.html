@@ -8,86 +8,103 @@
 \f0\fs24 \cf0 <!DOCTYPE html>\
 <html lang="en">\
 <head>\
-<meta charset="UTF-8" />\
+<meta charset="UTF-8">\
 <title>Timezone Clocks</title>\
+\
 <style>\
   body \{\
-    font-family: Inter, system-ui, sans-serif;\
+    margin: 0;\
+    padding: 30px;\
+    font-family: -apple-system, BlinkMacSystemFont, "Inter", sans-serif;\
     display: flex;\
     justify-content: center;\
-    gap: 60px;\
-    padding: 30px;\
+    gap: 80px;\
     background: transparent;\
   \}\
 \
-  .clock-wrap \{\
+  .clock \{\
     text-align: center;\
   \}\
 \
   .city \{\
-    font-size: 22px;\
+    font-size: 28px;\
     font-weight: 600;\
+    margin-bottom: 6px;\
   \}\
 \
   .digital \{\
-    font-size: 42px;\
-    font-weight: 700;\
-    margin: 8px 0 20px;\
+    font-size: 52px;\
+    font-weight: 800;\
+    margin-bottom: 20px;\
   \}\
 \
   canvas \{\
-    background: #fff3e6;\
+    background: #fff2e5;\
     border-radius: 50%;\
+  \}\
+\
+  @media (max-width: 700px) \{\
+    body \{\
+      flex-direction: column;\
+      gap: 50px;\
+    \}\
   \}\
 </style>\
 </head>\
+\
 <body>\
 \
-<div class="clock-wrap">\
+<div class="clock">\
   <div class="city">Sarasota</div>\
   <div class="digital" id="sarasota-digital"></div>\
-  <canvas id="sarasota" width="220" height="220"></canvas>\
+  <canvas id="sarasota" width="240" height="240"></canvas>\
 </div>\
 \
-<div class="clock-wrap">\
+<div class="clock">\
   <div class="city">Nairobi</div>\
   <div class="digital" id="nairobi-digital"></div>\
-  <canvas id="nairobi" width="220" height="220"></canvas>\
+  <canvas id="nairobi" width="240" height="240"></canvas>\
 </div>\
 \
 <script>\
-function drawClock(canvasId, timeZone, digitalId) \{\
+function clock(canvasId, timezone, digitalId, label) \{\
   const canvas = document.getElementById(canvasId);\
   const ctx = canvas.getContext("2d");\
   const radius = canvas.width / 2;\
   ctx.translate(radius, radius);\
 \
-  function render() \{\
+  function draw() \{\
     ctx.clearRect(-radius, -radius, canvas.width, canvas.height);\
 \
     const now = new Date(\
-      new Date().toLocaleString("en-US", \{ timeZone \})\
+      new Date().toLocaleString("en-US", \{ timeZone: timezone \})\
     );\
+\
+    const hours = now.getHours();\
+    const minutes = now.getMinutes();\
+    const seconds = now.getSeconds();\
 \
     document.getElementById(digitalId).innerText =\
       now.toLocaleTimeString([], \{ hour: '2-digit', minute: '2-digit' \});\
 \
+    // Clock face\
     ctx.beginPath();\
-    ctx.arc(0, 0, radius - 5, 0, Math.PI * 2);\
-    ctx.fillStyle = "#fff3e6";\
+    ctx.arc(0, 0, radius - 6, 0, Math.PI * 2);\
+    ctx.fillStyle = "#fff2e5";\
     ctx.fill();\
 \
+    // Hands color\
     ctx.strokeStyle = "#f97316";\
-    ctx.lineWidth = 4;\
-    ctx.stroke();\
+    ctx.lineCap = "round";\
 \
-    const hour = now.getHours() % 12;\
-    const minute = now.getMinutes();\
-    const second = now.getSeconds();\
+    // Hour hand\
+    drawHand(((hours % 12) + minutes / 60) * 30, radius * 0.5, 7);\
 \
-    drawHand((hour + minute / 60) * 30, radius * 0.5, 6);\
-    drawHand(minute * 6, radius * 0.75, 4);\
-    drawHand(second * 6, radius * 0.85, 2);\
+    // Minute hand\
+    drawHand(minutes * 6, radius * 0.75, 5);\
+\
+    // Second hand\
+    drawHand(seconds * 6, radius * 0.85, 2);\
   \}\
 \
   function drawHand(angle, length, width) \{\
@@ -100,12 +117,12 @@ function drawClock(canvasId, timeZone, digitalId) \{\
     ctx.rotate(-angle * Math.PI / 180);\
   \}\
 \
-  setInterval(render, 1000);\
-  render();\
+  setInterval(draw, 1000);\
+  draw();\
 \}\
 \
-drawClock("sarasota", "America/New_York", "sarasota-digital");\
-drawClock("nairobi", "Africa/Nairobi", "nairobi-digital");\
+clock("sarasota", "America/New_York", "sarasota-digital");\
+clock("nairobi", "Africa/Nairobi", "nairobi-digital");\
 </script>\
 \
 </body>\
